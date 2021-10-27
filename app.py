@@ -211,11 +211,11 @@ def edit_club(club_id):
         submit = {
             "club_name": request.form.get("club_name")
         }
-        mongo.db.club.update({"_id": ObjectId(club_id)}, submit)
+        mongo.db.clubs.update({"_id": ObjectId(club_id)}, submit)
         flash("Club Successfully Updated")
         return redirect(url_for("get_clubs"))
 
-    club = mongo.db.club.find_one({"_id": ObjectId(club_id)})
+    club = mongo.db.clubs.find_one({"_id": ObjectId(club_id)})
     return render_template("clubs_edit.html", club=club)
 
 
