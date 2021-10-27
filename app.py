@@ -158,6 +158,11 @@ def get_categories():
     categories = list(mongo.db.categories.find().sort("category_name", 1))
     return render_template("categories.html", categories=categories)
 
+@app.route("/get_clubs")
+def get_clubs():
+    clubs = list(mongo.db.categories.find().sort("club_name", 1))
+    return render_template("clubs.html", clubs=clubs)
+
 
 @app.route("/add_category", methods=["GET", "POST"])
 def add_category():
@@ -170,6 +175,19 @@ def add_category():
         return redirect(url_for("get_categories"))
 
     return render_template("add_category.html")
+
+
+@app.route("/add_clubs", methods=["GET", "POST"])
+def add_club():
+    if request.method == "POST":
+        club = {
+            "club_name": request.form.get("club_name")
+        }
+        mongo.db.categories.insert_one(club)
+        flash("New Club Added")
+        return redirect(url_for("get_clubs"))
+
+    return render_template("clubs_add.html")
 
 
 @app.route("/edit_category/<category_id>", methods=["GET", "POST"])
@@ -185,12 +203,31 @@ def edit_category(category_id):
     category = mongo.db.categories.find_one({"_id": ObjectId(category_id)})
     return render_template("edit_category.html", category=category)
 
+@app.route("/edit_club/<club_id>", methods=["GET", "POST"])
+def edit_club(club_id):
+    if request.method == "POST":
+        submit = {
+            "club_name": request.form.get("club_name")
+        }
+        mongo.db.club.update({"_id": ObjectId(club_id)}, submit)
+        flash("Club Successfully Updated")
+        return redirect(url_for("get_clubs"))
+
+    club = mongo.db.club.find_one({"_id": ObjectId(club_id)})
+    return render_template("clubs_edit.html", club=club)
+
 
 @app.route("/delete_category/<category_id>")
 def delete_category(category_id):
     mongo.db.categories.remove({"_id": ObjectId(category_id)})
     flash("Category Successfully Deleted")
     return redirect(url_for("get_categories"))
+
+@app.route("/delete_club/<club_id>")
+def delete_club(club_id):
+    mongo.db.clubs.remove({"_id": ObjectId(club_id)})
+    flash("Club Successfully Deleted")
+    return redirect(url_for("get_clubs"))
 
 
 if __name__ == "__main__":
