@@ -158,9 +158,10 @@ def get_categories():
     categories = list(mongo.db.categories.find().sort("category_name", 1))
     return render_template("categories.html", categories=categories)
 
+
 @app.route("/get_clubs")
 def get_clubs():
-    clubs = list(mongo.db.categories.find().sort("club_name", 1))
+    clubs = list(mongo.db.clubs.find().sort("club_name", 1))
     return render_template("clubs.html", clubs=clubs)
 
 
@@ -183,7 +184,7 @@ def add_club():
         club = {
             "club_name": request.form.get("club_name")
         }
-        mongo.db.categories.insert_one(club)
+        mongo.db.clubs.insert_one(club)
         flash("New Club Added")
         return redirect(url_for("get_clubs"))
 
@@ -202,6 +203,7 @@ def edit_category(category_id):
 
     category = mongo.db.categories.find_one({"_id": ObjectId(category_id)})
     return render_template("edit_category.html", category=category)
+
 
 @app.route("/edit_club/<club_id>", methods=["GET", "POST"])
 def edit_club(club_id):
@@ -222,6 +224,7 @@ def delete_category(category_id):
     mongo.db.categories.remove({"_id": ObjectId(category_id)})
     flash("Category Successfully Deleted")
     return redirect(url_for("get_categories"))
+
 
 @app.route("/delete_club/<club_id>")
 def delete_club(club_id):
