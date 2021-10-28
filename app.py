@@ -186,8 +186,8 @@ def get_clubs():
 
 @app.route("/get_leagues")
 def get_leagues():
-    clubs = list(mongo.db.leagues.find().sort("league_name", 1))
-    return render_template("leagues.html",leagues=leagues)
+    leagues = list(mongo.db.leagues.find().sort("league_name", 1))
+    return render_template("leagues.html", leagues=leagues)
 
 
 @app.route("/add_category", methods=["GET", "POST"])
@@ -218,7 +218,7 @@ def add_club():
 @app.route("/add_leagues", methods=["GET", "POST"])
 def add_league():
     if request.method == "POST":
-        club = {
+        league = {
             "league_name": request.form.get("league_name")
         }
         mongo.db.leagues.insert_one(league)
@@ -254,6 +254,7 @@ def edit_club(club_id):
 
     club = mongo.db.clubs.find_one({"_id": ObjectId(club_id)})
     return render_template("clubs_edit.html", club=club)
+    
 
 app.route("/edit_league/<league_id>", methods=["GET", "POST"])
 def edit_league(league_id):
