@@ -125,6 +125,25 @@ def add_task():
     categories = mongo.db.categories.find().sort("category_name", 1)
     return render_template("add_task.html", categories=categories)
 
+@app.route("/add_match", methods=["GET", "POST"])
+def add_match():
+    if request.method == "POST":
+        is_urgent = "on" if request.form.get("is_urgent") else "off"
+        task = {
+            "category_name": request.form.get("category_name"),
+            "task_name": request.form.get("task_name"),
+            "task_description": request.form.get("task_description"),
+            "is_urgent": is_urgent,
+            "due_date": request.form.get("due_date"),
+            "created_by": session["user"]
+        }
+        mongo.db.tasks.insert_one(task)
+        flash("Task Successfully Added")
+        return redirect(url_for("get_tasks"))
+
+    categories = mongo.db.categories.find().sort("category_name", 1)
+    return render_template("match_add.html", categories=categories)
+
 
 @app.route("/edit_task/<task_id>", methods=["GET", "POST"])
 def edit_task(task_id):
@@ -165,6 +184,12 @@ def get_clubs():
     return render_template("clubs.html", clubs=clubs)
 
 
+@app.route("/get_leagues")
+def get_leagues():
+    clubs = list(mongo.db.leagues.find().sort("league_name", 1))
+    return render_template("leagues.html",leagues=leagues)
+
+
 @app.route("/add_category", methods=["GET", "POST"])
 def add_category():
     if request.method == "POST":
@@ -189,6 +214,18 @@ def add_club():
         return redirect(url_for("get_clubs"))
 
     return render_template("clubs_add.html")
+
+@app.route("/add_leagues", methods=["GET", "POST"])
+def add_league():
+    if request.method == "POST":
+        club = {
+            "league_name": request.form.get("league_name")
+        }
+        mongo.db.leagues.insert_one(league)
+        flash("New league Added")
+        return redirect(url_for("get_leagues"))
+
+    return render_template("leagues_add.html")
 
 
 @app.route("/edit_category/<category_id>", methods=["GET", "POST"])
@@ -218,6 +255,19 @@ def edit_club(club_id):
     club = mongo.db.clubs.find_one({"_id": ObjectId(club_id)})
     return render_template("clubs_edit.html", club=club)
 
+app.route("/edit_league/<league_id>", methods=["GET", "POST"])
+def edit_league(league_id):
+    if request.method == "POST":
+        submit = {
+            "league_name": request.form.get("league_name")
+        }
+        mongo.db.leagues.update({"_id": ObjectId(league_id)}, submit)
+        flash("league Successfully Updated")
+        return redirect(url_for("get_leagues"))
+
+    league = mongo.db.leagues.find_one({"_id": ObjectId(league_id)})
+    return render_template("leagues_edit.html", league=league)
+
 
 @app.route("/delete_category/<category_id>")
 def delete_category(category_id):
@@ -231,6 +281,13 @@ def delete_club(club_id):
     mongo.db.clubs.remove({"_id": ObjectId(club_id)})
     flash("Club Successfully Deleted")
     return redirect(url_for("get_clubs"))
+
+
+@app.route("/delete_league/<league_id>")
+def delete_league(league_id):
+    mongo.db.leagues.remove({"_id": ObjectId(league_id)})
+    flash("league Successfully Deleted")
+    return redirect(url_for("get_leagues"))
 
 
 if __name__ == "__main__":
