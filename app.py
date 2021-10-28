@@ -43,6 +43,7 @@ def register():
             flash("Username already exists")
             return redirect(url_for("register"))
 
+
         register = {
             "username": request.form.get("username").lower(),
             "password": generate_password_hash(request.form.get("password"))
@@ -125,24 +126,25 @@ def add_task():
     categories = mongo.db.categories.find().sort("category_name", 1)
     return render_template("add_task.html", categories=categories)
 
+
 @app.route("/add_match", methods=["GET", "POST"])
 def add_match():
     if request.method == "POST":
-        is_urgent = "on" if request.form.get("is_urgent") else "off"
-        task = {
-            "category_name": request.form.get("category_name"),
-            "task_name": request.form.get("task_name"),
-            "task_description": request.form.get("task_description"),
-            "is_urgent": is_urgent,
-            "due_date": request.form.get("due_date"),
-            "created_by": session["user"]
+        match = {
+           "league_name": request.form.get("league_name"),
+            "match_date": request.form.get("match_date"),
+            "club1": request.form.get("club1"),
+            "club2": request.form.get("club2"),
+            "score1": request.form.get("score1"),
+            "score2": request.form.get("score2")
         }
-        mongo.db.tasks.insert_one(task)
-        flash("Task Successfully Added")
-        return redirect(url_for("get_tasks"))
+        mongo.db.matches.insert_one(match)
+        flash("Match Successfully Added")
+        return redirect(url_for("get_match"))
 
-    categories = mongo.db.categories.find().sort("category_name", 1)
-    return render_template("match_add.html", categories=categories)
+    leagues = mongo.db.leagues.find().sort("league_name", 1)
+    clubs = mongo.db.clubs.find().sort("club_name", 1)
+    return render_template("match_add.html", match=match, leagues=leagues, clubs=clubs)
 
 
 @app.route("/edit_task/<task_id>", methods=["GET", "POST"])
@@ -163,6 +165,26 @@ def edit_task(task_id):
     task = mongo.db.tasks.find_one({"_id": ObjectId(task_id)})
     categories = mongo.db.categories.find().sort("category_name", 1)
     return render_template("edit_task.html", task=task, categories=categories)
+
+
+@app.route("/edit_match/<match_id>", methods=["GET", "POST"])
+def edit_match(match_id):
+    if request.method == "POST":
+        submit = {
+            "league_name": request.form.get("league_name"),
+            "match_date": request.form.get("match_date"),
+            "club1": request.form.get("club1"),
+            "club2": request.form.get("club2"),
+            "score1": request.form.get("score1"),
+            "score2": request.form.get("score2")
+        }
+        mongo.db.matches.update({"_id": ObjectId(match_id)}, submit)
+        flash("Match Successfully Updated")
+
+    match = mongo.db.matches.find_one({"_id": ObjectId(match_id)})
+    leagues = mongo.db.leagues.find().sort("league_name", 1)
+    clubs = mongo.db.clubs.find().sort("club_name", 1)
+    return render_template("edit_match.html", match=match, leagues=leagues, clubs=clubs)
 
 
 @app.route("/delete_task/<task_id>")
